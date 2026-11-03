@@ -10,8 +10,6 @@ import {
   Users,
   BarChart3,
   Terminal as TerminalIcon,
-  FileCode,
-  BookOpen,
   Download,
   Copy,
   Check,
@@ -21,8 +19,6 @@ import {
   Trash2,
   AlertCircle,
   CheckCircle2,
-  ChevronRight,
-  Sparkles,
   Info
 } from 'lucide-react';
 
@@ -72,423 +68,6 @@ const REGISTROS_INICIALES: Paciente[] = [
   },
 ];
 
-const CODIGO_PYTHON = `"""
-=============================================================================
-SISTEMA OPTOGESTIÓN - CENTRO UNIVERSITARIO DE ATENCIÓN OPTOMÉTRICA
-UNIVERSIDAD CES
-=============================================================================
-Programa de consola en Python para la administración de pacientes,
-evaluaciones optométricas y control estadístico.
-
-Autor: Equipo de Desarrollo Universidad CES
-Requisitos: Python 3.8+
-=============================================================================
-"""
-
-import json
-import os
-import sys
-
-ARCHIVO_DATOS = "pacientes.json"
-
-# Registros de prueba iniciales requeridos si el archivo no existe o está vacío
-DATOS_SEMILLA = [
-    {
-        "id": "1001",
-        "nombre": "Mariana Gómez Restrepo",
-        "edad": 22,
-        "sexo": "F",
-        "usa_correccion": True
-    },
-    {
-        "id": "1002",
-        "nombre": "Carlos Andrés Jaramillo",
-        "edad": 45,
-        "sexo": "M",
-        "usa_correccion": True
-    },
-    {
-        "id": "1003",
-        "nombre": "Valentina Londoño Ortiz",
-        "edad": 19,
-        "sexo": "F",
-        "usa_correccion": False
-    },
-    {
-        "id": "1004",
-        "nombre": "Mateo Restrepo Pérez",
-        "edad": 68,
-        "sexo": "M",
-        "usa_correccion": True
-    },
-    {
-        "id": "1005",
-        "nombre": "Sofía Ramírez Calle",
-        "edad": 31,
-        "sexo": "F",
-        "usa_correccion": False
-    }
-]
-
-
-# =============================================================================
-# PERSISTENCIA DE DATOS (JSON)
-# =============================================================================
-
-def cargar_pacientes(ruta=ARCHIVO_DATOS):
-    """
-    Carga los pacientes desde el archivo JSON especificado.
-    Si el archivo no existe o está vacío, lo inicializa con los 5 registros
-    de prueba iniciales para efectos prácticos.
-    """
-    if not os.path.exists(ruta) or os.path.getsize(ruta) == 0:
-        print(f"\\n[INFO] Archivo '{ruta}' no encontrado o vacío.")
-        print("[INFO] Inicializando sistema con 5 registros de prueba predeterminados...")
-        guardar_pacientes(DATOS_SEMILLA, ruta)
-        return list(DATOS_SEMILLA)
-
-    try:
-        with open(ruta, "r", encoding="utf-8") as archivo:
-            datos = json.load(archivo)
-            if not isinstance(datos, list):
-                print("[ADVERTENCIA] Formato no válido en el archivo. Recreando registros iniciales...")
-                guardar_pacientes(DATOS_SEMILLA, ruta)
-                return list(DATOS_SEMILLA)
-            print(f"[OK] Se cargaron {len(datos)} pacientes exitosamente desde '{ruta}'.")
-            return datos
-    except (json.JSONDecodeError, IOError) as error:
-        print(f"[ERROR] Error al leer el archivo JSON ({error}).")
-        print("[INFO] Reestableciendo registros iniciales de prueba...")
-        guardar_pacientes(DATOS_SEMILLA, ruta)
-        return list(DATOS_SEMILLA)
-
-
-def guardar_pacientes(pacientes, ruta=ARCHIVO_DATOS):
-    """
-    Guarda la lista de diccionarios de pacientes en el archivo JSON con sangría
-    legible y codificación UTF-8.
-    """
-    try:
-        with open(ruta, "w", encoding="utf-8") as archivo:
-            json.dump(pacientes, archivo, indent=4, ensure_ascii=False)
-        return True
-    except IOError as error:
-        print(f"[ERROR] No fue posible guardar los datos en '{ruta}': {error}")
-        return False
-
-
-# =============================================================================
-# MÓDULOS FUNCIONALES
-# =============================================================================
-
-def validar_edad():
-    """
-    Solicita y valida que la edad ingresada sea un entero entre 1 y 120 años.
-    """
-    while True:
-        entrada = input("  > Ingrese la edad (1 - 120 años): ").strip()
-        try:
-            edad = int(entrada)
-            if 1 <= edad <= 120:
-                return edad
-            else:
-                print("    [!] Error: La edad debe estar estrictamente entre 1 y 120 años.")
-        except ValueError:
-            print("    [!] Error: Debe ingresar un número entero válido.")
-
-
-def validar_booleano_correccion():
-    """
-    Solicita y valida si el paciente usa corrección visual.
-    Acepta opciones flexibles: Sí/No, S/N, True/False, 1/0 y retorna un valor booleano.
-    """
-    opciones_afirmativas = {"si", "sí", "s", "true", "t", "1", "y", "yes"}
-    opciones_negativas = {"no", "n", "false", "f", "0"}
-
-    while True:
-        entrada = input("  > ¿El paciente usa corrección visual? (Sí/No): ").strip().lower()
-        if entrada in opciones_afirmativas:
-            return True
-        elif entrada in opciones_negativas:
-            return False
-        else:
-            print("    [!] Entrada inválida. Por favor responda 'Sí' (S) o 'No' (N).")
-
-
-def registrar_paciente(pacientes):
-    """
-    Módulo 1: Registrar paciente.
-    Solicita los datos obligatorios por consola, valida rangos y tipos,
-    verifica duplicidad de identificación y agrega el nuevo diccionario a la lista.
-    """
-    print("\\n" + "=" * 55)
-    print("      MÓDULO 1: REGISTRO DE NUEVO PACIENTE")
-    print("=" * 55)
-
-    # 1. Validación de ID único
-    while True:
-        id_paciente = input("  > Ingrese el ID / Documento del paciente: ").strip()
-        if not id_paciente:
-            print("    [!] El ID no puede estar vacío.")
-            continue
-
-        id_existente = any(str(p.get("id")) == str(id_paciente) for p in pacientes)
-        if id_existente:
-            print(f"    [!] Ya existe un paciente registrado con el ID '{id_paciente}'. Ingrese uno diferente.")
-        else:
-            break
-
-    # 2. Nombre completo
-    while True:
-        nombre = input("  > Ingrese el nombre completo: ").strip()
-        if nombre:
-            break
-        print("    [!] El nombre no puede estar vacío.")
-
-    # 3. Validación de Edad (1 - 120)
-    edad = validar_edad()
-
-    # 4. Sexo biológico / género
-    while True:
-        sexo = input("  > Ingrese sexo (F = Femenino, M = Masculino, O = Otro): ").strip().upper()
-        if sexo in ["F", "M", "O"]:
-            break
-        print("    [!] Ingrese una opción válida: F, M u O.")
-
-    # 5. Uso de corrección visual (Booleano)
-    usa_correccion = validar_booleano_correccion()
-
-    # Creación del diccionario con la estructura exigida
-    nuevo_paciente = {
-        "id": id_paciente,
-        "nombre": nombre,
-        "edad": edad,
-        "sexo": sexo,
-        "usa_correccion": usa_correccion
-    }
-
-    pacientes.append(nuevo_paciente)
-    guardar_pacientes(pacientes)
-
-    print("\\n[ÉXITO] Paciente registrado satisfactoriamente en Optogestión.")
-    print(f"        ID: {id_paciente} | Nombre: {nombre} | Corrección: {'SÍ' if usa_correccion else 'NO'}")
-
-
-def consultar_paciente(pacientes):
-    """
-    Módulo 2: Consultar paciente.
-    Permite buscar un paciente mediante su identificador (ID).
-    Muestra la ficha clínica o un aviso si no se encuentra.
-    """
-    print("\\n" + "=" * 55)
-    print("      MÓDULO 2: CONSULTAR PACIENTE POR IDENTIFICADOR")
-    print("=" * 55)
-
-    if not pacientes:
-        print("[AVISO] No hay pacientes registrados actualmente en la base de datos.")
-        return
-
-    busqueda_id = input("  > Ingrese el ID del paciente a consultar: ").strip()
-    encontrado = None
-
-    for paciente in pacientes:
-        if str(paciente.get("id")) == str(busqueda_id):
-            encontrado = paciente
-            break
-
-    if encontrado:
-        print("\\n" + "-" * 45)
-        print("            FICHA DEL PACIENTE")
-        print("-" * 45)
-        print(f"  • Identificación:       {encontrado.get('id')}")
-        print(f"  • Nombre completo:      {encontrado.get('nombre')}")
-        print(f"  • Edad:                 {encontrado.get('edad')} años")
-        print(f"  • Sexo:                 {encontrado.get('sexo')}")
-        correccion_txt = "Sí (requiere/usa lentes o gafas)" if encontrado.get("usa_correccion") else "No usa corrección"
-        print(f"  • Usa Corrección Visual: {correccion_txt}")
-        print("-" * 45)
-    else:
-        print(f"\\n[AVISO] No se encontró ningún paciente con el ID '{busqueda_id}' en el sistema.")
-
-
-def mostrar_pacientes(pacientes):
-    """
-    Módulo 3: Mostrar pacientes registrados.
-    Recorre la lista de diccionarios utilizando un ciclo for,
-    consultando la clave 'nombre' y mostrando la lista organizada en pantalla.
-    """
-    print("\\n" + "=" * 70)
-    print("      MÓDULO 3: LISTADO DE PACIENTES REGISTRADOS (UNIVERSIDAD CES)")
-    print("=" * 70)
-
-    if not pacientes:
-        print("[AVISO] El sistema no cuenta con pacientes registrados actualmente.")
-        return
-
-    print(f"Total de registros: {len(pacientes)}\\n")
-    encabezado = f"{'#':<4} {'ID':<10} {'NOMBRE':<30} {'EDAD':<6} {'SEXO':<6} {'CORRECCIÓN':<10}"
-    print(encabezado)
-    print("-" * 70)
-
-    # Recorrido obligatorio mediante ciclo for consultando las claves del diccionario
-    for indice, paciente in enumerate(pacientes, start=1):
-        nombre = paciente.get("nombre", "Sin nombre")
-        id_p = str(paciente.get("id", "N/A"))
-        edad = str(paciente.get("edad", "N/A"))
-        sexo = str(paciente.get("sexo", "N/A"))
-        correccion = "SÍ" if paciente.get("usa_correccion") else "NO"
-
-        print(f"{indice:<4} {id_p:<10} {nombre:<30} {edad:<6} {sexo:<6} {correccion:<10}")
-
-    print("-" * 70)
-
-
-def buscar_pacientes_correccion(pacientes):
-    """
-    Módulo 4: Buscar pacientes con corrección visual.
-    Muestra los nombres de los pacientes que utilizan corrección óptica,
-    o informa al usuario si ninguno cumple la condición.
-    """
-    print("\\n" + "=" * 60)
-    print("   MÓDULO 4: PACIENTES CON CORRECCIÓN VISUAL ACTIVA")
-    print("=" * 60)
-
-    if not pacientes:
-        print("[AVISO] No hay registros en el sistema para evaluar.")
-        return
-
-    pacientes_con_lentes = []
-
-    # Recorrido para filtrar quienes usan corrección
-    for p in pacientes:
-        if p.get("usa_correccion") is True:
-            pacientes_con_lentes.append(p)
-
-    if pacientes_con_lentes:
-        print(f"\\nSe encontraron {len(pacientes_con_lentes)} paciente(s) que usan corrección óptica:\\n")
-        for i, p in enumerate(pacientes_con_lentes, start=1):
-            nombre = p.get("nombre")
-            id_p = p.get("id")
-            edad = p.get("edad")
-            print(f"  {i}. {nombre} (ID: {id_p}, Edad: {edad} años)")
-    else:
-        print("\\n[INFO] Ningún paciente registrado actualmente utiliza corrección visual.")
-
-
-def generar_estadisticas(pacientes):
-    """
-    Módulo 5: Generar estadísticas de la jornada optométrica.
-    Calcula y muestra en terminal el número total de pacientes, la edad promedio,
-    y la cantidad de pacientes que usan corrección visual.
-    Incluye validación estricta para evitar errores de división por cero si la lista está vacía.
-    """
-    print("\\n" + "=" * 60)
-    print("      MÓDULO 5: ESTADÍSTICAS DE LA JORNADA OPTOMÉTRICA")
-    print("=" * 60)
-
-    total_pacientes = len(pacientes)
-
-    # Validación fundamental: evitar división por cero
-    if total_pacientes == 0:
-        print("[AVISO] No se pueden calcular estadísticas: La lista de pacientes está vacía.")
-        print("        Registre al menos un paciente para visualizar métricas.")
-        return
-
-    # Cálculos estadísticos
-    suma_edades = sum(p.get("edad", 0) for p in pacientes)
-    edad_promedio = suma_edades / total_pacientes
-
-    total_con_correccion = sum(1 for p in pacientes if p.get("usa_correccion") is True)
-    total_sin_correccion = total_pacientes - total_con_correccion
-
-    porcentaje_con_correccion = (total_con_correccion / total_pacientes) * 100
-    porcentaje_sin_correccion = (total_sin_correccion / total_pacientes) * 100
-
-    edades = [p.get("edad", 0) for p in pacientes]
-    edad_minima = min(edades)
-    edad_maxima = max(edades)
-
-    # Desglose por sexo
-    mujeres = sum(1 for p in pacientes if p.get("sexo") == "F")
-    hombres = sum(1 for p in pacientes if p.get("sexo") == "M")
-    otros = total_pacientes - (mujeres + hombres)
-
-    print(f"\\n  • Número total de pacientes atendidos:    {total_pacientes}")
-    print(f"  • Edad promedio de los pacientes:        {edad_promedio:.2f} años")
-    print(f"  • Rango de edad evaluado:                {edad_minima} a {edad_maxima} años")
-    print(f"  • Pacientes con corrección visual:       {total_con_correccion} ({porcentaje_con_correccion:.1f}%)")
-    print(f"  • Pacientes sin corrección visual:       {total_sin_correccion} ({porcentaje_sin_correccion:.1f}%)")
-    print("\\n  Distribución demográfica:")
-    print(f"    - Femenino:  {mujeres} ({mujeres / total_pacientes * 100:.1f}%)")
-    print(f"    - Masculino: {hombres} ({hombres / total_pacientes * 100:.1f}%)")
-    if otros > 0:
-        print(f"    - Otro:      {otros} ({otros / total_pacientes * 100:.1f}%)")
-    print("-" * 60)
-
-
-# =============================================================================
-# MENÚ PRINCIPAL Y CICLO DE EJECUCIÓN
-# =============================================================================
-
-def imprimir_banner():
-    banner = """
-    ╔════════════════════════════════════════════════════════════╗
-    ║                 UNIVERSIDAD CES - MEDELLÍN                 ║
-    ║         Centro Universitario de Atención Optométrica       ║
-    ║               SISTEMA DE GESTIÓN "OPTOGESTIÓN"             ║
-    ╚════════════════════════════════════════════════════════════╝
-    """
-    print(banner)
-
-
-def menu_principal():
-    imprimir_banner()
-    pacientes = cargar_pacientes(ARCHIVO_DATOS)
-
-    while True:
-        print("\\n" + "─" * 46)
-        print("              MENÚ PRINCIPAL")
-        print("─" * 46)
-        print("  1. Registrar paciente")
-        print("  2. Consultar paciente")
-        print("  3. Mostrar pacientes registrados")
-        print("  4. Buscar pacientes con corrección visual")
-        print("  5. Generar estadísticas")
-        print("  6. Salir")
-        print("─" * 46)
-
-        opcion = input("  Seleccione una opción (1-6): ").strip()
-
-        if opcion == "1":
-            registrar_paciente(pacientes)
-        elif opcion == "2":
-            consultar_paciente(pacientes)
-        elif opcion == "3":
-            mostrar_pacientes(pacientes)
-        elif opcion == "4":
-            buscar_pacientes_correccion(pacientes)
-        elif opcion == "5":
-            generar_estadisticas(pacientes)
-        elif opcion == "6":
-            print("\\nGuardando información en 'pacientes.json'...")
-            guardar_pacientes(pacientes, ARCHIVO_DATOS)
-            print("=" * 60)
-            print(" ¡Gracias por utilizar el Sistema Optogestión - Universidad CES!")
-            print(" Sesión cerrada correctamente.")
-            print("=" * 60)
-            sys.exit(0)
-        else:
-            print("\\n[!] Opción inválida. Ingrese un número entre 1 y 6.")
-
-
-if __name__ == "__main__":
-    try:
-        menu_principal()
-    except KeyboardInterrupt:
-        print("\\n\\n[INFO] Ejecución interrumpida por el usuario. Cerrando programa...")
-        sys.exit(0)
-`;
-
 export default function App() {
   // Estado de los pacientes
   const [pacientes, setPacientes] = useState<Paciente[]>(() => {
@@ -504,7 +83,7 @@ export default function App() {
     return REGISTROS_INICIALES;
   });
 
-  const [activeTab, setActiveTab] = useState<'terminal' | 'dashboard' | 'code' | 'readme' | 'json'>('terminal');
+  const [activeTab, setActiveTab] = useState<'terminal' | 'dashboard' | 'json'>('terminal');
   const [filtroTexto, setFiltroTexto] = useState('');
   const [filtroCorreccion, setFiltroCorreccion] = useState<'todos' | 'con' | 'sin'>('todos');
 
@@ -521,8 +100,7 @@ export default function App() {
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState(false);
 
-  // Copiado
-  const [copiadoPython, setCopiadoPython] = useState(false);
+  // Estado copiado JSON
   const [copiadoJson, setCopiadoJson] = useState(false);
 
   // Terminal state
@@ -736,7 +314,7 @@ export default function App() {
           " Sesión cerrada correctamente.",
           "============================================================",
           "",
-          "[Presione cualquier tecla o escriba 'reiniciar' para volver al menú]"
+          "[Escriba 'menu' o seleccione una opción rápida para continuar]"
         );
       } else if (cmd.toLowerCase() === 'reiniciar' || cmd.toLowerCase() === 'clear' || cmd.toLowerCase() === 'menu') {
         newHistory.push(
@@ -855,10 +433,10 @@ export default function App() {
           "---------------------------------------------",
           "            FICHA DEL PACIENTE               ",
           "---------------------------------------------",
-          `  • Identificación:       ${match.id}`,
-          `  • Nombre completo:      ${match.nombre}`,
-          `  • Edad:                 ${match.edad} años`,
-          `  • Sexo:                 ${match.sexo}`,
+          `  • Identificación:        ${match.id}`,
+          `  • Nombre completo:       ${match.nombre}`,
+          `  • Edad:                  ${match.edad} años`,
+          `  • Sexo:                  ${match.sexo}`,
           `  • Usa Corrección Visual: ${match.usa_correccion ? 'Sí (requiere/usa lentes o gafas)' : 'No usa corrección'}`,
           "---------------------------------------------"
         );
@@ -883,16 +461,6 @@ export default function App() {
     }
 
     setTerminalHistory(newHistory);
-  };
-
-  // Botón rápido para ejecutar opción de consola
-  const sendCommand = (text: string) => {
-    setTerminalInput(text);
-    setTimeout(() => {
-      const fakeEvent = { preventDefault: () => {} } as React.FormEvent;
-      // trigger input change
-      terminalInputRef.current?.focus();
-    }, 50);
   };
 
   // Agregar paciente desde GUI
@@ -965,6 +533,22 @@ export default function App() {
     URL.revokeObjectURL(url);
   };
 
+  // Descargar script optogestion.py directamente
+  const handleDescargarPython = async () => {
+    try {
+      const res = await fetch('/optogestion.py');
+      if (res.ok) {
+        const text = await res.text();
+        descargarArchivo(text, 'optogestion.py', 'text/x-python');
+      } else {
+        window.open('/optogestion.py', '_blank');
+      }
+    } catch (e) {
+      console.error(e);
+      window.open('/optogestion.py', '_blank');
+    }
+  };
+
   // Copiar al portapapeles
   const copiarTexto = (texto: string, setCopiado: (val: boolean) => void) => {
     navigator.clipboard.writeText(texto);
@@ -1011,18 +595,18 @@ export default function App() {
               <h1 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2">
                 Sistema Optogestión
                 <span className="text-xs font-normal px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                  Python 3.8+
+                  Consola & Panel Clínico
                 </span>
               </h1>
             </div>
           </div>
 
-          {/* Botones de descarga directa */}
+          {/* Botones de acción / descargas */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => descargarArchivo(CODIGO_PYTHON, 'optogestion.py', 'text/x-python')}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition shadow-md shadow-emerald-900/40"
-              title="Descargar script python optogestion.py"
+              onClick={handleDescargarPython}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition shadow-md shadow-emerald-900/40"
+              title="Descargar script de consola optogestion.py"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Descargar .py</span>
@@ -1033,12 +617,12 @@ export default function App() {
               title="Descargar base de datos pacientes.json"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Descargar .json</span>
+              <span>Exportar .json</span>
             </button>
           </div>
         </div>
 
-        {/* Barra de Pestañas */}
+        {/* Barra de Pestañas (Solo Consola, Panel Visual y Base de Datos) */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t border-slate-800/80 flex overflow-x-auto no-scrollbar">
           <nav className="flex space-x-1 sm:space-x-4 py-2">
             <button
@@ -1069,30 +653,6 @@ export default function App() {
             </button>
 
             <button
-              onClick={() => setActiveTab('code')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap ${
-                activeTab === 'code'
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-              }`}
-            >
-              <FileCode className="w-4 h-4 text-teal-400" />
-              Código Python (optogestion.py)
-            </button>
-
-            <button
-              onClick={() => setActiveTab('readme')}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap ${
-                activeTab === 'readme'
-                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-              }`}
-            >
-              <BookOpen className="w-4 h-4 text-amber-400" />
-              README.md
-            </button>
-
-            <button
               onClick={() => setActiveTab('json')}
               className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-semibold transition whitespace-nowrap ${
                 activeTab === 'json'
@@ -1101,7 +661,7 @@ export default function App() {
               }`}
             >
               <span className="text-xs font-mono font-bold text-amber-400">{"{}"}</span>
-              pacientes.json
+              Base de Datos (pacientes.json)
             </button>
           </nav>
         </div>
@@ -1118,10 +678,10 @@ export default function App() {
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <TerminalIcon className="w-5 h-5 text-emerald-400" />
-                  Terminal Interactivo de Consola (Python 3)
+                  Terminal Interactivo de Consola
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Ejecuta en tiempo real el ciclo continuo y los 5 módulos funcionales del programa <code className="text-emerald-300">optogestion.py</code>.
+                  Ejecuta en tiempo real el ciclo continuo y los módulos del programa de consola de Optogestión.
                 </p>
               </div>
 
@@ -1206,7 +766,7 @@ export default function App() {
 
             {/* Ventana de Terminal */}
             <div className="bg-[#0b101b] rounded-2xl border border-slate-800 shadow-2xl overflow-hidden font-mono flex flex-col h-[560px]">
-              {/* Barra superior de terminal estilo Mac/Linux */}
+              {/* Barra superior de terminal */}
               <div className="bg-[#121926] px-4 py-2.5 border-b border-slate-800/80 flex items-center justify-between">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
@@ -1272,7 +832,7 @@ export default function App() {
               </form>
             </div>
 
-            {/* Guía rápida de requerimientos cumplidos */}
+            {/* Resumen de especificaciones */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-400 bg-slate-900/60 p-3 rounded-xl border border-slate-800">
               <div className="flex items-start gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
@@ -1505,179 +1065,7 @@ export default function App() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: VISOR DE CÓDIGO PYTHON (optogestion.py) */}
-        {/* ========================================================================= */}
-        {activeTab === 'code' && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-4 rounded-xl">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <FileCode className="w-5 h-5 text-teal-400" />
-                  Archivo Fuente: <span className="text-emerald-400 font-mono">optogestion.py</span>
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Código Python estructurado de acuerdo a todos los requerimientos: 6 opciones, persistencia JSON y validaciones.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => copiarTexto(CODIGO_PYTHON, setCopiadoPython)}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition"
-                >
-                  {copiadoPython ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copiadoPython ? '¡Copiado!' : 'Copiar Código'}</span>
-                </button>
-                <button
-                  onClick={() => descargarArchivo(CODIGO_PYTHON, 'optogestion.py', 'text/x-python')}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Descargar optogestion.py</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Bloque de código con números de línea */}
-            <div className="bg-[#0b101b] rounded-2xl border border-slate-800 overflow-hidden font-mono text-xs shadow-2xl">
-              <div className="bg-[#121926] px-4 py-2 border-b border-slate-800 flex items-center justify-between text-slate-400">
-                <span className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full bg-teal-400"></span>
-                  Python 3 Script • 345 líneas
-                </span>
-                <span className="text-[11px] text-slate-500">Codificación: UTF-8</span>
-              </div>
-              <pre className="p-4 overflow-x-auto text-slate-300 leading-relaxed max-h-[640px] select-text">
-                <code>{CODIGO_PYTHON}</code>
-              </pre>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 4: VISOR DE README.MD */}
-        {/* ========================================================================= */}
-        {activeTab === 'readme' && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 p-4 rounded-xl">
-              <div>
-                <h2 className="text-base font-bold text-white flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-amber-400" />
-                  Documentación del Proyecto: <span className="text-amber-400 font-mono">README.md</span>
-                </h2>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Estructura completa de documentación técnica, funcionalidades e instrucciones de ejecución.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    const readmeText = `# Sistema Optogestión - Centro de Atención Optométrica (Universidad CES)\n\nConsulte el archivo README.md completo descargándolo directamente.`;
-                    copiarTexto(readmeText, setCopiadoPython);
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700 transition"
-                >
-                  <Copy className="w-3.5 h-3.5" />
-                  <span>Copiar Markdown</span>
-                </button>
-                <button
-                  onClick={async () => {
-                    // Descargar README
-                    const res = await fetch('/README.md');
-                    const text = await res.text();
-                    descargarArchivo(text, 'README.md', 'text/markdown');
-                  }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Descargar README.md</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 space-y-6 text-slate-300 text-sm leading-relaxed">
-              <div className="border-b border-slate-800 pb-5">
-                <h1 className="text-2xl font-bold text-white">Sistema Optogestión - Universidad CES</h1>
-                <p className="text-emerald-400 text-sm mt-1">Centro Universitario de Atención Optométrica • Medellín</p>
-              </div>
-
-              <section className="space-y-2">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-emerald-400" />
-                  1. Descripción del Proyecto
-                </h2>
-                <p>
-                  Sistema Optogestión es una aplicación por consola programada en Python diseñada para sistematizar
-                  el registro, consulta, filtrado clínico y generación de estadísticas demográficas en jornadas de salud
-                  visual de la Universidad CES.
-                </p>
-              </section>
-
-              <section className="space-y-2">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-emerald-400" />
-                  2. Estructura de Datos Requerida
-                </h2>
-                <p>La información reside en una <strong>lista de diccionarios</strong> con la siguiente estructura:</p>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-emerald-300">
-                  {`{
-    "id": "1001",
-    "nombre": "Mariana Gómez Restrepo",
-    "edad": 22,
-    "sexo": "F",
-    "usa_correccion": true
-}`}
-                </div>
-              </section>
-
-              <section className="space-y-2">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-emerald-400" />
-                  3. Módulos Funcionales
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                  <div className="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                    <span className="font-bold text-emerald-400 block mb-1">Módulo 1: Registrar paciente</span>
-                    Valida edad entre 1 y 120 años, rechaza IDs duplicados y procesa entradas booleanas flexibles (Sí/No).
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                    <span className="font-bold text-emerald-400 block mb-1">Módulo 2: Consultar paciente</span>
-                    Búsqueda exacta por ID y presentación en ficha ordenada.
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                    <span className="font-bold text-emerald-400 block mb-1">Módulo 3: Mostrar registrados</span>
-                    Recorrido con ciclo <code>for</code> consultando la clave <code>nombre</code> en formato tabular.
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-lg border border-slate-800">
-                    <span className="font-bold text-emerald-400 block mb-1">Módulo 4: Pacientes con corrección</span>
-                    Filtra y lista únicamente los pacientes con <code>usa_correccion == True</code>.
-                  </div>
-                  <div className="bg-slate-950/60 p-3 rounded-lg border border-slate-800 md:col-span-2">
-                    <span className="font-bold text-emerald-400 block mb-1">Módulo 5: Generar estadísticas</span>
-                    Calcula total de pacientes, edad promedio y pacientes con corrección visual. Incluye control contra <code>ZeroDivisionError</code> si la lista está vacía.
-                  </div>
-                </div>
-              </section>
-
-              <section className="space-y-2">
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                  <ChevronRight className="w-4 h-4 text-emerald-400" />
-                  4. Instrucciones de Ejecución
-                </h2>
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 font-mono text-xs text-slate-300 space-y-2">
-                  <p className="text-slate-500"># Clonar o situarse en la carpeta:</p>
-                  <p className="text-emerald-400">cd optogestion</p>
-                  <p className="text-slate-500"># Ejecutar con Python 3:</p>
-                  <p className="text-emerald-400">python3 optogestion.py</p>
-                </div>
-              </section>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 5: VISOR Y EDITOR DE JSON (pacientes.json) */}
+        {/* TAB 3: BASE DE DATOS (pacientes.json) */}
         {/* ========================================================================= */}
         {activeTab === 'json' && (
           <div className="space-y-4">
@@ -1685,10 +1073,10 @@ export default function App() {
               <div>
                 <h2 className="text-base font-bold text-white flex items-center gap-2">
                   <span className="font-mono text-amber-400 font-bold">{"{ }"}</span>
-                  Archivo de Datos: <span className="text-amber-400 font-mono">pacientes.json</span>
+                  Archivo de Datos Persistente: <span className="text-amber-400 font-mono">pacientes.json</span>
                 </h2>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Estado actual de la base de datos local en formato JSON con los {pacientes.length} registros.
+                  Estado actual de la base de datos local en formato JSON con los {pacientes.length} registros del sistema.
                 </p>
               </div>
 
