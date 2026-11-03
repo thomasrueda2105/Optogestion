@@ -30,37 +30,45 @@ interface Paciente {
   usa_correccion: boolean;
 }
 
+const ID_MIGRACION: Record<string, string> = {
+  "1001": "1020345678",
+  "1002": "1017234890",
+  "1003": "1035678912",
+  "1004": "1008456123",
+  "1005": "1042789456",
+};
+
 const REGISTROS_INICIALES: Paciente[] = [
   {
-    id: "1001",
+    id: "1020345678",
     nombre: "Mariana Gómez Restrepo",
     edad: 22,
     sexo: "F",
     usa_correccion: true,
   },
   {
-    id: "1002",
+    id: "1017234890",
     nombre: "Carlos Andrés Jaramillo",
     edad: 45,
     sexo: "M",
     usa_correccion: true,
   },
   {
-    id: "1003",
+    id: "1035678912",
     nombre: "Valentina Londoño Ortiz",
     edad: 19,
     sexo: "F",
     usa_correccion: false,
   },
   {
-    id: "1004",
+    id: "1008456123",
     nombre: "Mateo Restrepo Pérez",
     edad: 68,
     sexo: "M",
     usa_correccion: true,
   },
   {
-    id: "1005",
+    id: "1042789456",
     nombre: "Sofía Ramírez Calle",
     edad: 31,
     sexo: "F",
@@ -75,7 +83,13 @@ export default function App() {
     if (guardado) {
       try {
         const parsed = JSON.parse(guardado);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Migrar IDs viejos de 4 dígitos a los nuevos de 10 dígitos
+          return parsed.map((p: Paciente) => ({
+            ...p,
+            id: ID_MIGRACION[p.id] || p.id,
+          }));
+        }
       } catch (e) {
         console.error(e);
       }
@@ -1142,7 +1156,7 @@ export default function App() {
                   type="text"
                   value={nuevoId}
                   onChange={(e) => setNuevoId(e.target.value)}
-                  placeholder="Ej: 1006 o CC102030"
+                  placeholder="Ej: 1020345678 (10 dígitos)"
                   className="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-emerald-500 font-mono"
                   required
                 />

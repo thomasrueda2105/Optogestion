@@ -30,7 +30,7 @@ La información se organiza en una **lista de diccionarios**, donde cada registr
 
 | Clave | Tipo | Descripción | Ejemplo |
 |---|---|---|---|
-| `id` | `str` / `int` | Identificación única del paciente | `"1001"` |
+| `id` | `str` / `int` | Identificación única del paciente | `"1020345678"` |
 | `nombre` | `str` | Nombre y apellidos del paciente | `"Mariana Gómez Restrepo"` |
 | `edad` | `int` | Edad en años cumplidos (rango de 1 a 120) | `22` |
 | `sexo` | `str` | Género/sexo del paciente (`F`, `M`, `O`) | `"F"` |

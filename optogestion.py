@@ -20,35 +20,35 @@ ARCHIVO_DATOS = "pacientes.json"
 # Registros de prueba iniciales requeridos si el archivo no existe o está vacío
 DATOS_SEMILLA = [
     {
-        "id": "1001",
+        "id": "1020345678",
         "nombre": "Mariana Gómez Restrepo",
         "edad": 22,
         "sexo": "F",
         "usa_correccion": True
     },
     {
-        "id": "1002",
+        "id": "1017234890",
         "nombre": "Carlos Andrés Jaramillo",
         "edad": 45,
         "sexo": "M",
         "usa_correccion": True
     },
     {
-        "id": "1003",
+        "id": "1035678912",
         "nombre": "Valentina Londoño Ortiz",
         "edad": 19,
         "sexo": "F",
         "usa_correccion": False
     },
     {
-        "id": "1004",
+        "id": "1008456123",
         "nombre": "Mateo Restrepo Pérez",
         "edad": 68,
         "sexo": "M",
         "usa_correccion": True
     },
     {
-        "id": "1005",
+        "id": "1042789456",
         "nombre": "Sofía Ramírez Calle",
         "edad": 31,
         "sexo": "F",
