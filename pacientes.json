@@ -1,0 +1,37 @@
+[
+    {
+        "id": "1001",
+        "nombre": "Mariana Gómez Restrepo",
+        "edad": 22,
+        "sexo": "F",
+        "usa_correccion": true
+    },
+    {
+        "id": "1002",
+        "nombre": "Carlos Andrés Jaramillo",
+        "edad": 45,
+        "sexo": "M",
+        "usa_correccion": true
+    },
+    {
+        "id": "1003",
+        "nombre": "Valentina Londoño Ortiz",
+        "edad": 19,
+        "sexo": "F",
+        "usa_correccion": false
+    },
+    {
+        "id": "1004",
+        "nombre": "Mateo Restrepo Pérez",
+        "edad": 68,
+        "sexo": "M",
+        "usa_correccion": true
+    },
+    {
+        "id": "1005",
+        "nombre": "Sofía Ramírez Calle",
+        "edad": 31,
+        "sexo": "F",
+        "usa_correccion": false
+    }
+]

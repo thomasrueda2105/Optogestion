@@ -1,0 +1,6 @@
+{
+  "name": "Sistema Optogestión - Universidad CES",
+  "description": "Sistema de gestión de pacientes y estadísticas optométricas para el Centro Universitario de Atención Optométrica de la Universidad CES.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
